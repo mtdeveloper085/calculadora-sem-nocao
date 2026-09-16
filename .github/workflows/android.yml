@@ -20,7 +20,7 @@ jobs:
           node-version: 22
 
       - name: Configurar Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -34,19 +34,19 @@ jobs:
       - name: Sincronizar aplicativo
         run: npx cap sync android
 
-      - name: Aumentar compatibilidade Android
+      - name: Configurar compatibilidade Android
         run: |
-          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 23/' android/variables.gradle || true
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/' android/variables.gradle
           cat android/variables.gradle
 
-      - name: Gerar APK universal
+      - name: Gerar APK
         working-directory: android
-        run: ./gradlew clean assembleDebug --stacktrace
+        run: ./gradlew clean assembleDebug
 
-      - name: Verificar APK
+      - name: Verificar assinatura do APK
         run: |
-          ls -lh android/app/build/outputs/apk/debug/
-          $ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)/apksigner verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
+          APKSIGNER="$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
