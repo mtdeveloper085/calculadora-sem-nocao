@@ -1,0 +1,6 @@
+{
+  "appId": "app.calculadorasemnocao",
+  "appName": "Calculadora Sem Noção",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
