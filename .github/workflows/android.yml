@@ -1,4 +1,4 @@
-name: Gerar APK
+name: Gerar APK Compatível
 
 on:
   workflow_dispatch:
@@ -34,12 +34,22 @@ jobs:
       - name: Sincronizar aplicativo
         run: npx cap sync android
 
-      - name: Gerar APK
+      - name: Aumentar compatibilidade Android
+        run: |
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 23/' android/variables.gradle || true
+          cat android/variables.gradle
+
+      - name: Gerar APK universal
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew clean assembleDebug --stacktrace
+
+      - name: Verificar APK
+        run: |
+          ls -lh android/app/build/outputs/apk/debug/
+          $ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)/apksigner verify --verbose android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: calculadora-sem-nocao-apk
+          name: calculadora-sem-nocao-apk-compativel
           path: android/app/build/outputs/apk/debug/app-debug.apk
